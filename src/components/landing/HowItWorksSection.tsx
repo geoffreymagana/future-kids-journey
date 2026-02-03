@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { MessageCircle, Users, GraduationCap, Heart } from 'lucide-react';
+import { WaveDivider } from './WaveDivider';
 
 const steps = [
   {
@@ -30,7 +31,7 @@ const steps = [
 
 export const HowItWorksSection = ({ id }: { id: string }) => {
   return (
-    <section id={id} className="section-padding bg-muted">
+    <section id={id} className="relative section-padding bg-muted pt-24 md:pt-32">
       <div className="container-wide">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -80,6 +81,9 @@ export const HowItWorksSection = ({ id }: { id: string }) => {
           </div>
         </div>
       </div>
+      
+      {/* Wave divider */}
+      <WaveDivider fillColor="hsl(var(--soft-navy))" />
     </section>
   );
 };
