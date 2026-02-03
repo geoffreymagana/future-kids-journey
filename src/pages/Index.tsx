@@ -7,6 +7,7 @@ import { SocialProofSection } from '@/components/landing/SocialProofSection';
 import { InterestFormSection } from '@/components/landing/InterestFormSection';
 import { ShareSection } from '@/components/landing/ShareSection';
 import { Footer } from '@/components/landing/Footer';
+import { FloatingCTA } from '@/components/landing/FloatingCTA';
 import { useReferral } from '@/hooks/useReferral';
 
 const Index = () => {
@@ -44,7 +45,7 @@ const Index = () => {
   };
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background overflow-x-hidden">
       <HeroSection 
         onScrollToForm={scrollToForm} 
         onScrollToHowItWorks={scrollToHowItWorks}
@@ -80,6 +81,9 @@ const Index = () => {
       </div>
       
       <Footer />
+      
+      {/* Floating CTA */}
+      <FloatingCTA onScrollToForm={scrollToForm} />
     </main>
   );
 };

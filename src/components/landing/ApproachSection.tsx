@@ -1,6 +1,8 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Zap, Brain, ShieldCheck } from 'lucide-react';
+import { useRef } from 'react';
 import parentChildImage from '@/assets/parent-child-learning.png';
+import { WaveDivider } from './WaveDivider';
 
 const pillars = [
   {
@@ -21,16 +23,25 @@ const pillars = [
 ];
 
 export const ApproachSection = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+  
+  const imageY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+
   return (
-    <section className="section-padding bg-background">
+    <section ref={sectionRef} className="relative section-padding bg-background pt-24 md:pt-32">
       <div className="container-wide">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Image */}
+          {/* Image with parallax */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
+            style={{ y: imageY }}
             className="order-2 lg:order-1"
           >
             <img
@@ -84,6 +95,9 @@ export const ApproachSection = () => {
           </motion.div>
         </div>
       </div>
+      
+      {/* Wave divider */}
+      <WaveDivider fillColor="hsl(var(--muted))" />
     </section>
   );
 };

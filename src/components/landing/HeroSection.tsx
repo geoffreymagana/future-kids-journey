@@ -1,7 +1,9 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
+import { useRef } from 'react';
 import heroImage from '@/assets/hero-children.png';
+import { WaveDivider } from './WaveDivider';
 
 interface HeroSectionProps {
   onScrollToForm: () => void;
@@ -9,11 +11,27 @@ interface HeroSectionProps {
 }
 
 export const HeroSection = ({ onScrollToForm, onScrollToHowItWorks }: HeroSectionProps) => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const decorativeY1 = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  const decorativeY2 = useTransform(scrollYProgress, [0, 1], [0, 150]);
+  const imageY = useTransform(scrollYProgress, [0, 1], [0, 50]);
+
   return (
-    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden gradient-hero-bg">
-      {/* Decorative circles */}
-      <div className="absolute top-20 right-10 w-64 h-64 rounded-full bg-soft-purple/10 blur-3xl" />
-      <div className="absolute bottom-20 left-10 w-80 h-80 rounded-full bg-primary/10 blur-3xl" />
+    <section ref={sectionRef} className="relative min-h-screen flex flex-col justify-center overflow-hidden gradient-hero-bg">
+      {/* Decorative circles with parallax */}
+      <motion.div 
+        style={{ y: decorativeY1 }}
+        className="absolute top-20 right-10 w-64 h-64 rounded-full bg-soft-purple/10 blur-3xl" 
+      />
+      <motion.div 
+        style={{ y: decorativeY2 }}
+        className="absolute bottom-20 left-10 w-80 h-80 rounded-full bg-primary/10 blur-3xl" 
+      />
       
       <div className="container-wide section-padding relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -68,11 +86,12 @@ export const HeroSection = ({ onScrollToForm, onScrollToHowItWorks }: HeroSectio
             </motion.div>
           </motion.div>
           
-          {/* Hero Image */}
+          {/* Hero Image with parallax */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
+            style={{ y: imageY }}
             className="relative"
           >
             <div className="relative">
@@ -102,7 +121,7 @@ export const HeroSection = ({ onScrollToForm, onScrollToHowItWorks }: HeroSectio
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10"
       >
         <motion.div
           animate={{ y: [0, 10, 0] }}
@@ -112,6 +131,9 @@ export const HeroSection = ({ onScrollToForm, onScrollToHowItWorks }: HeroSectio
           <ChevronDown className="h-8 w-8" />
         </motion.div>
       </motion.div>
+      
+      {/* Wave divider */}
+      <WaveDivider fillColor="hsl(var(--muted))" />
     </section>
   );
 };

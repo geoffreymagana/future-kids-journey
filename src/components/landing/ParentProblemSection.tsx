@@ -1,5 +1,7 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { BookOpen, HelpCircle, Shield } from 'lucide-react';
+import { useRef } from 'react';
+import { WaveDivider } from './WaveDivider';
 
 const problems = [
   {
@@ -32,8 +34,16 @@ const itemVariants = {
 };
 
 export const ParentProblemSection = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+  
+  const cardsY = useTransform(scrollYProgress, [0, 1], [30, -30]);
+
   return (
-    <section className="section-padding bg-muted">
+    <section ref={sectionRef} className="relative section-padding bg-muted pt-24 md:pt-32">
       <div className="container-narrow">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -52,6 +62,7 @@ export const ParentProblemSection = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
+          style={{ y: cardsY }}
           className="grid md:grid-cols-3 gap-6 mb-12"
         >
           {problems.map((problem, index) => (
@@ -80,6 +91,9 @@ export const ParentProblemSection = () => {
           You're not alone. And you don't need to panic.
         </motion.p>
       </div>
+      
+      {/* Wave divider */}
+      <WaveDivider fillColor="hsl(var(--background))" />
     </section>
   );
 };

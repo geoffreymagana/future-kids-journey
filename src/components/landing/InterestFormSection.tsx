@@ -64,7 +64,7 @@ export const InterestFormSection = ({ id, onSubmit }: InterestFormSectionProps) 
   };
 
   return (
-    <section id={id} className="section-padding bg-background">
+    <section id={id} className="section-padding bg-background pt-24 md:pt-32">
       <div className="container-wide">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Form */}
