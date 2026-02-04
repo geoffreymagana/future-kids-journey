@@ -1,19 +1,13 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 
-import authRoutes from '@/routes/auth';
-import formsRoutes from '@/routes/forms';
-import enrollmentsRoutes from '@/routes/enrollments';
-import attendanceRoutes from '@/routes/attendance';
-import adminRoutes from '@/routes/admin';
-import migrateAttendance from '@/migrations/attendance';
+import authRoutes from '@/routes/auth.supabase.js';
+import formsRoutes from '@/routes/forms.supabase.js';
+import enrollmentsRoutes from '@/routes/enrollments.supabase.js';
+import attendanceRoutes from '@/routes/attendance.supabase.js';
+import adminRoutes from '@/routes/admin.supabase.js';
 import { authenticate } from '@/middleware/auth';
-import { FormSubmission } from '@/models/FormSubmission';
 import { getClientIP, getUserAgent } from '@/utils/analytics';
-
-dotenv.config();
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
@@ -47,48 +41,21 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // Public redirect route for share links (/s/:code for short URLs)
-app.get('/s/:code', async (req: Request, res: Response) => {
-  try {
-    const { code } = req.params;
-    const ip = getClientIP(req);
-    const userAgent = getUserAgent(req);
-
-    // Find submission by share code
-    const submission = await FormSubmission.findOneAndUpdate(
-      { shareCode: code },
-      {
-        $push: {
-          'shareMetrics.visits': {
-            code,
-            timestamp: new Date(),
-            ip,
-            userAgent
-          }
-        }
-      },
-      { new: true }
-    );
-
-    if (!submission) {
-      // Code not found, redirect to home
-      return res.redirect(302, '/');
-    }
-
-    // Redirect to landing page with referral parameter
-    return res.redirect(302, `/?ref=${submission._id}`);
-  } catch (error: unknown) {
-    console.error('Redirect tracking error:', error);
-    // On error, still redirect to home
-    return res.redirect(302, '/');
-  }
+// TODO: Re-implement with Supabase when needed
+// This route currently redirects to home as a placeholder
+app.get('/s/:code', (req: Request, res: Response) => {
+  // Placeholder: redirect to home
+  // When needed, implement with Supabase query to share_metrics table
+  return res.redirect(302, '/');
 });
 
-// Routes
+// Routes (now using Supabase)
 app.use('/api/auth', authRoutes);
 app.use('/api/forms', formsRoutes);
 app.use('/api/enrollments', enrollmentsRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/admin', adminRoutes);
+// Old attendance and admin routes removed - use enrollments and auth routes instead
 
 // 404 handler
 app.use((req: Request, res: Response) => {
@@ -115,19 +82,17 @@ app.use(
   }
 );
 
-// Connect to MongoDB and start server
+// Start server (using Supabase PostgreSQL)
 const startServer = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/future-kids-journey');
-    console.log('✅ Connected to MongoDB');
-
-    // Run migrations
-    console.log('🔄 Running migrations...');
-    await migrateAttendance();
+    console.log('✅ Starting server with Supabase PostgreSQL backend');
 
     app.listen(PORT, () => {
       console.log(`✅ Server running on http://localhost:${PORT}`);
       console.log(`📡 API: http://localhost:${PORT}/api`);
+      console.log(`🔐 Auth: POST http://localhost:${PORT}/api/auth/login`);
+      console.log(`📝 Forms: POST http://localhost:${PORT}/api/forms/submit`);
+      console.log(`📊 Enrollments: GET http://localhost:${PORT}/api/enrollments`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

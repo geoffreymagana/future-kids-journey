@@ -76,7 +76,7 @@ export const EnrollmentTable = ({ isSuperAdmin }: EnrollmentTableProps) => {
   const fetchEnrollments = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await apiService.request<{enrollments: Enrollment[], pagination?: { total: number, pages: number }}>(
+      const response = await apiService.request<{enrollments: any[], pagination?: { total: number, pages: number }}>(
         'GET',
         '/enrollments',
         undefined,
@@ -91,14 +91,29 @@ export const EnrollmentTable = ({ isSuperAdmin }: EnrollmentTableProps) => {
       );
 
       if (response.success && response.data) {
-        const data = response.data as {enrollments: Enrollment[], pagination?: { total: number, pages: number }};
-        setEnrollments(data.enrollments || []);
+        const data = response.data as {enrollments: any[], pagination?: { total: number, pages: number }};
+        // Map API response format to component format
+        const mappedEnrollments: Enrollment[] = (data.enrollments || []).map((e: any) => ({
+          _id: e.id || e._id,
+          submissionId: e.submission_id || e.submissionId || e.id,
+          parentName: e.form_submissions?.parent_name || e.parentName || '',
+          whatsappNumber: e.form_submissions?.whatsapp_number || e.whatsappNumber || '',
+          status: e.status || 'inquiry',
+          paymentStatus: e.payment_status || e.paymentStatus || 'unpaid',
+          totalAmount: e.enrollment_amount || e.totalAmount || 0,
+          paidAmount: e.paid_amount || e.paidAmount || 0,
+          pendingAmount: e.pending_amount || e.pendingAmount || 0,
+          enrollmentDate: e.created_at || e.enrollmentDate,
+          commissionEarned: e.commission_earned || e.commissionEarned || { totalCommission: 0, currency: 'KES' }
+        }));
+
+        setEnrollments(mappedEnrollments);
         if (data.pagination) {
-          setTotalEntries(data.pagination.total || data.enrollments.length);
+          setTotalEntries(data.pagination.total || mappedEnrollments.length);
           setTotalPages(data.pagination.pages || 1);
         } else {
           // Fallback if pagination not returned
-          setTotalEntries(data.enrollments.length);
+          setTotalEntries(mappedEnrollments.length);
           setTotalPages(1);
         }
       }
@@ -129,10 +144,14 @@ export const EnrollmentTable = ({ isSuperAdmin }: EnrollmentTableProps) => {
         updateData.pendingAmount = Math.max(0, total - paid);
       }
 
+      // Use the enrollment ID (which is the _id from the frontend)
       const response = await apiService.request(
-        'PATCH',
-        `/enrollments/${editData.submissionId}`,
-        updateData
+        'PUT',
+        `/enrollments/${id}`,
+        {
+          enrollment_amount: updateData.totalAmount,
+          status: updateData.status
+        }
       );
 
       if (response.success) {
@@ -166,13 +185,13 @@ export const EnrollmentTable = ({ isSuperAdmin }: EnrollmentTableProps) => {
         notes: paymentNotes || undefined
       };
 
-      const response = await apiService.recordPayment(selectedEnrollment.submissionId, paymentData);
+      const response = await apiService.recordPayment(selectedEnrollment._id, paymentData);
 
       if (response.success) {
         // Auto-enroll when payment is recorded
         await apiService.request(
-          'PATCH',
-          `/enrollments/${selectedEnrollment.submissionId}`,
+          'PUT',
+          `/enrollments/${selectedEnrollment._id}`,
           { status: 'enrolled' }
         );
 

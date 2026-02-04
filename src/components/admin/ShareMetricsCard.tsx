@@ -35,7 +35,11 @@ export const ShareMetricsCard = ({ isSuperAdmin }: ShareMetricsProps) => {
     const fetchMetrics = async () => {
       setLoading(true);
       try {
-        const response = await apiService.getSubmissions({ limit: 1000 });
+        // Fetch with proper pagination
+        const response = await apiService.getSubmissions(
+          { page: 1, limit: 1000 },
+          '-submittedAt'
+        );
         if (response.success && response.data) {
           const data = response.data as {submissions: ShareMetricsData[]};
           const subs = data.submissions || [];
