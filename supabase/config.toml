@@ -1,7 +1,0 @@
-project_id = "gzkwlmwvzrjyhztryasm"
-
-[functions.admin-login]
-verify_jwt = false
-
-[functions.admin-data]
-verify_jwt = false
