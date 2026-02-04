@@ -22,7 +22,7 @@ const Index = () => {
     userShares,
     getReferralLink,
     trackShare,
-    incrementParentCount,
+    submitInterest,
   } = useReferral();
 
   const scrollToForm = () => {
@@ -33,15 +33,17 @@ const Index = () => {
     howItWorksRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleFormSubmit = (data: { name: string; whatsapp: string; ageRange: string }) => {
-    setParentName(data.name);
-    setHasSubmitted(true);
-    incrementParentCount();
-    
-    // Scroll to share section
-    setTimeout(() => {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }, 100);
+  const handleFormSubmit = async (data: { name: string; whatsapp: string; ageRange: string }) => {
+    const result = await submitInterest(data);
+    if (result.success) {
+      setParentName(data.name);
+      setHasSubmitted(true);
+      
+      // Scroll to share section
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }, 100);
+    }
   };
 
   return (
