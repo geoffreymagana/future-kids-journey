@@ -22,7 +22,7 @@ export const HeroSection = ({ onScrollToForm, onScrollToHowItWorks }: HeroSectio
   const imageY = useTransform(scrollYProgress, [0, 1], [0, 50]);
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen flex flex-col justify-center overflow-hidden gradient-hero-bg">
+    <section ref={sectionRef} className="relative min-h-screen flex flex-col justify-center overflow-hidden gradient-hero-bg pt-20 md:pt-0">
       {/* Decorative circles with parallax */}
       <motion.div 
         style={{ y: decorativeY1 }}
@@ -46,10 +46,10 @@ export const HeroSection = ({ onScrollToForm, onScrollToHowItWorks }: HeroSectio
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-soft-navy leading-tight mb-6"
+              className="text-3xl md:text-5xl lg:text-6xl font-bold text-soft-navy leading-tight mb-6"
             >
-              Prepare your child for the future —{' '}
-              <span className="text-soft-purple">calmly, early, and confidently.</span>
+              Is Your Child Ready for the{' '}
+              <span className="text-soft-purple">AI-Powered World?</span>
             </motion.h1>
             
             <motion.p
@@ -58,8 +58,7 @@ export const HeroSection = ({ onScrollToForm, onScrollToHowItWorks }: HeroSectio
               transition={{ duration: 0.6, delay: 0.4 }}
               className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0"
             >
-              School teaches subjects. We help children build confidence with technology, 
-              problem-solving, and AI thinking — at the right age, without pressure.
+              Learn how to guide your child through technology, AI thinking, and problem-solving—thoughtfully and age-appropriately.
             </motion.p>
             
             <motion.div
@@ -73,7 +72,7 @@ export const HeroSection = ({ onScrollToForm, onScrollToHowItWorks }: HeroSectio
                 size="xl"
                 onClick={onScrollToForm}
               >
-                Join the Parent Interest List
+                Join the Workshop
               </Button>
               <Button 
                 variant="heroOutline" 

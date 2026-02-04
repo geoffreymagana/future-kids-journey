@@ -57,29 +57,33 @@ export const useReferral = () => {
   }, [referralData.referralId]);
 
   const trackShare = useCallback((platform: string) => {
-    const newUserShares = referralData.userShares + 1;
-    const newTotalShares = referralData.totalShares + 1;
-    
-    localStorage.setItem('userShares', newUserShares.toString());
-    localStorage.setItem('totalShares', newTotalShares.toString());
-    
-    setReferralData(prev => ({
-      ...prev,
-      userShares: newUserShares,
-      totalShares: newTotalShares,
-    }));
+    setReferralData(prev => {
+      const newUserShares = prev.userShares + 1;
+      const newTotalShares = prev.totalShares + 1;
+      
+      localStorage.setItem('userShares', newUserShares.toString());
+      localStorage.setItem('totalShares', newTotalShares.toString());
+      
+      return {
+        ...prev,
+        userShares: newUserShares,
+        totalShares: newTotalShares,
+      };
+    });
 
     console.log(`Share tracked: ${platform}`);
-  }, [referralData.userShares, referralData.totalShares]);
+  }, []);
 
   const incrementParentCount = useCallback(() => {
-    const newTotal = referralData.totalParents + 1;
-    localStorage.setItem('totalParents', newTotal.toString());
-    setReferralData(prev => ({
-      ...prev,
-      totalParents: newTotal,
-    }));
-  }, [referralData.totalParents]);
+    setReferralData(prev => {
+      const newTotal = prev.totalParents + 1;
+      localStorage.setItem('totalParents', newTotal.toString());
+      return {
+        ...prev,
+        totalParents: newTotal,
+      };
+    });
+  }, []);
 
   return {
     ...referralData,

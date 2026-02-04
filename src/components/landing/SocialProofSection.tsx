@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
 import { Users, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { apiService } from '@/services/api';
 
-interface SocialProofSectionProps {
-  totalParents: number;
+interface FormStats {
+  totalSubmissions: number;
+  uniqueShares: number;
   totalShares: number;
 }
 
@@ -27,10 +29,40 @@ const AnimatedCounter = ({ value, duration = 2 }: { value: number; duration?: nu
     return () => clearInterval(timer);
   }, [value, duration]);
 
-  return <span>{count}</span>;
+  return <span>{count.toLocaleString()}</span>;
 };
 
-export const SocialProofSection = ({ totalParents, totalShares }: SocialProofSectionProps) => {
+export const SocialProofSection = () => {
+  const [stats, setStats] = useState<FormStats>({
+    totalSubmissions: 0,
+    uniqueShares: 0,
+    totalShares: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await apiService.getPublicStats();
+        if (response.success && response.data) {
+          setStats(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+        // Use fallback values if fetch fails
+        setStats({
+          totalSubmissions: 0,
+          uniqueShares: 0,
+          totalShares: 0,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <section className="relative section-padding bg-soft-navy text-background pt-24 md:pt-32">
       <div className="container-narrow">
@@ -42,7 +74,7 @@ export const SocialProofSection = ({ totalParents, totalShares }: SocialProofSec
           className="text-center"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-12">
-            Parents Are Taking Action
+            Engaged Parents Are Already Here
           </h2>
           
           <div className="grid md:grid-cols-2 gap-8 mb-8">
@@ -57,10 +89,10 @@ export const SocialProofSection = ({ totalParents, totalShares }: SocialProofSec
                 <Users className="w-8 h-8 text-primary" />
               </div>
               <div className="text-5xl md:text-6xl font-bold text-primary mb-2">
-                <AnimatedCounter value={totalParents} />
+                {isLoading ? '...' : <AnimatedCounter value={stats.totalSubmissions} />}
               </div>
               <p className="text-lg text-background/80">
-                Parents who have joined
+                Parents who have registered
               </p>
             </motion.div>
             
@@ -75,7 +107,7 @@ export const SocialProofSection = ({ totalParents, totalShares }: SocialProofSec
                 <Share2 className="w-8 h-8 text-soft-purple" />
               </div>
               <div className="text-5xl md:text-6xl font-bold text-soft-purple mb-2">
-                <AnimatedCounter value={totalShares} />
+                {isLoading ? '...' : <AnimatedCounter value={stats.totalShares} />}
               </div>
               <p className="text-lg text-background/80">
                 Parents who have shared this
@@ -90,7 +122,7 @@ export const SocialProofSection = ({ totalParents, totalShares }: SocialProofSec
             transition={{ delay: 0.5 }}
             className="text-lg text-background/70 italic"
           >
-            Parents are inviting other parents — because this matters.
+            These parents understand the importance of calm, early preparation for their children's future.
           </motion.p>
         </motion.div>
       </div>

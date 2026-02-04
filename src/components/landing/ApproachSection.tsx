@@ -7,18 +7,18 @@ import { WaveDivider } from './WaveDivider';
 const pillars = [
   {
     icon: Zap,
-    title: "Early Advantage",
-    description: "Start before it becomes stressful"
+    title: "Curiosity",
+    description: "Children are guided to ask questions and explore naturally"
   },
   {
     icon: Brain,
-    title: "Future-Ready Thinking",
-    description: "Beyond exams"
+    title: "Logical Thinking",
+    description: "Problem-solving skills built through guided exploration"
   },
   {
     icon: ShieldCheck,
-    title: "Safe Guidance",
-    description: "Structured, age-appropriate learning"
+    title: "Comfort with Technology",
+    description: "Steady, age-appropriate exposure without pressure"
   }
 ];
 
@@ -60,8 +60,13 @@ export const ApproachSection = () => {
             className="order-1 lg:order-2"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-soft-navy mb-8">
-              Guided exposure, not acceleration.
+              A guided approach to early technology and AI learning
             </h2>
+            
+            <p className="text-lg text-muted-foreground mb-8">
+              Children do not need to be rushed into advanced tools or complex systems.
+              They benefit most from guided exposure that builds:
+            </p>
             
             <div className="space-y-6 mb-8">
               {pillars.map((pillar, index) => (
@@ -89,8 +94,8 @@ export const ApproachSection = () => {
             </div>
             
             <p className="text-lg text-muted-foreground">
-              We give parents the confidence to guide their children through 
-              technology and AI — without being tech experts themselves.
+              In our approach to early learning, we emphasise understanding, exploration, and steady development 
+              rather than acceleration. The goal is not to replace school learning, but to complement it thoughtfully.
             </p>
           </motion.div>
         </div>

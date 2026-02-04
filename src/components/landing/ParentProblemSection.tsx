@@ -1,20 +1,23 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { BookOpen, HelpCircle, Shield } from 'lucide-react';
+import { BookOpen, Brain, Shield } from 'lucide-react';
 import { useRef } from 'react';
 import { WaveDivider } from './WaveDivider';
 
 const problems = [
   {
     icon: BookOpen,
-    text: "The curriculum feels outdated"
+    title: "Confidence when engaging with new ideas",
+    description: "Children develop self-assurance in exploring unfamiliar concepts"
   },
   {
-    icon: HelpCircle,
-    text: "I don't know how to prepare my child"
+    icon: Brain,
+    title: "Problem-solving and reasoning skills",
+    description: "Critical thinking becomes natural, not forced"
   },
   {
     icon: Shield,
-    text: "I want early exposure, not pressure"
+    title: "Curiosity without anxiety",
+    description: "Learning is introduced as a process, not a performance"
   }
 ];
 
@@ -53,8 +56,12 @@ export const ParentProblemSection = () => {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-soft-navy mb-4">
-            Most parents feel unsure — not careless.
+            We are preparing children for a future we have not yet seen
           </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            The world children will grow into will look very different from the one their parents grew up in.
+            Technology and artificial intelligence are already shaping how people learn, work, and solve problems.
+          </p>
         </motion.div>
         
         <motion.div
@@ -69,13 +76,16 @@ export const ParentProblemSection = () => {
             <motion.div
               key={index}
               variants={itemVariants}
-              className="bg-background rounded-2xl p-8 shadow-card text-center hover:shadow-elevated transition-shadow duration-300"
+              className="bg-background rounded-2xl p-8 shadow-card text-left hover:shadow-elevated transition-shadow duration-300"
             >
-              <div className="w-14 h-14 bg-soft-purple/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 bg-soft-purple/10 rounded-xl flex items-center justify-center mb-4">
                 <problem.icon className="w-7 h-7 text-soft-purple" />
               </div>
-              <p className="text-lg font-medium text-soft-navy">
-                "{problem.text}"
+              <h3 className="text-lg font-semibold text-soft-navy mb-2">
+                {problem.title}
+              </h3>
+              <p className="text-muted-foreground">
+                {problem.description}
               </p>
             </motion.div>
           ))}
@@ -86,9 +96,11 @@ export const ParentProblemSection = () => {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.6 }}
-          className="text-center text-xl text-muted-foreground font-medium"
+          className="text-center text-lg text-muted-foreground max-w-2xl mx-auto"
         >
-          You're not alone. And you don't need to panic.
+          Our focus is not on predicting the future, but on helping children develop the confidence 
+          and thinking skills they will need to navigate it. This workshop helps parents understand what 
+          that preparation can look like, starting early and done well.
         </motion.p>
       </div>
       

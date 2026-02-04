@@ -144,15 +144,15 @@
   }
   
   .section-padding {
-    @apply px-4 py-16 md:px-8 md:py-24 lg:py-32;
+    @apply px-4 py-16 sm:px-6 md:px-8 md:py-24 lg:py-32;
   }
   
   .container-narrow {
-    @apply max-w-4xl mx-auto;
+    @apply max-w-4xl mx-auto px-0;
   }
   
   .container-wide {
-    @apply max-w-6xl mx-auto;
+    @apply max-w-6xl mx-auto px-0;
   }
 }
 

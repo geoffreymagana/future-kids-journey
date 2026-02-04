@@ -1,0 +1,38 @@
+name: Future Kids Journey
+runtime: node
+env: node
+plan: free
+
+services:
+  - type: web
+    name: future-kids-journey-frontend
+    runtime: node
+    buildCommand: bun install && bun run build
+    startCommand: bun run preview
+    envVars:
+      - key: VITE_API_URL
+        value: ${api.env.RENDER_EXTERNAL_URL}/api
+
+  - type: web
+    name: future-kids-journey-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm run dev
+    envVars:
+      - key: MONGODB_URI
+        fromDatabase:
+          name: mongodb
+          property: connectionString
+      - key: JWT_SECRET
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: FRONTEND_URL
+        value: ${web.env.RENDER_EXTERNAL_URL}
+
+databases:
+  - name: mongodb
+    databaseName: future-kids-journey

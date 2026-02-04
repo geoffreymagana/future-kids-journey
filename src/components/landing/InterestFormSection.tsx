@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,12 +11,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { z } from 'zod';
+import { toast } from 'sonner';
+import { apiService } from '@/services/api';
+import { detectTrafficSource } from '@/utils/sourceDetection';
 import childExploringImage from '@/assets/child-exploring.png';
 
 const formSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   whatsapp: z.string().trim().min(10, "Please enter a valid WhatsApp number").max(15),
   ageRange: z.string().min(1, "Please select an age range"),
+  numberOfKids: z.number().int().min(1).max(10).optional(),
+  source: z.string().optional()
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -31,9 +36,73 @@ export const InterestFormSection = ({ id, onSubmit }: InterestFormSectionProps) 
     name: '',
     whatsapp: '',
     ageRange: '',
+    numberOfKids: 1,
+    source: ''
+  });
+  const [sessionId] = useState(() => {
+    // Generate or retrieve session ID
+    let sid = sessionStorage.getItem('formSessionId');
+    if (!sid) {
+      sid = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      sessionStorage.setItem('formSessionId', sid);
+    }
+    return sid;
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Detect traffic source on component mount
+  useEffect(() => {
+    const detectedSource = detectTrafficSource().source;
+    setFormData(prev => ({
+      ...prev,
+      source: detectedSource
+    }));
+  }, []);
+
+  const checkDuplicateInSession = (whatsapp: string): boolean => {
+    const recentSubmissions = sessionStorage.getItem('recentSubmissions');
+    if (!recentSubmissions) return false;
+
+    try {
+      const submissions: Array<{ whatsapp: string; timestamp: number }> = JSON.parse(recentSubmissions);
+      const now = Date.now();
+      const oneMinuteAgo = now - 60000; // 1 minute in milliseconds
+
+      // Check if the same WhatsApp number was submitted within the last minute
+      return submissions.some(
+        (submission) =>
+          submission.whatsapp === whatsapp && submission.timestamp > oneMinuteAgo
+      );
+    } catch {
+      return false;
+    }
+  };
+
+  const storeSubmissionInSession = (whatsapp: string) => {
+    const recentSubmissions = sessionStorage.getItem('recentSubmissions');
+    let submissions: Array<{ whatsapp: string; timestamp: number }> = [];
+
+    if (recentSubmissions) {
+      try {
+        submissions = JSON.parse(recentSubmissions);
+      } catch {
+        submissions = [];
+      }
+    }
+
+    // Add the new submission
+    submissions.push({
+      whatsapp,
+      timestamp: Date.now(),
+    });
+
+    // Keep only submissions from the last 2 minutes (to be safe)
+    const twoMinutesAgo = Date.now() - 120000;
+    submissions = submissions.filter((s) => s.timestamp > twoMinutesAgo);
+
+    sessionStorage.setItem('recentSubmissions', JSON.stringify(submissions));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,13 +120,42 @@ export const InterestFormSection = ({ id, onSubmit }: InterestFormSectionProps) 
       setErrors(newErrors);
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
-      // Simulate submission delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      onSubmit(result.data);
+      const response = await apiService.submitForm({
+        name: result.data.name,
+        whatsapp: result.data.whatsapp,
+        ageRange: result.data.ageRange,
+        numberOfKids: result.data.numberOfKids || 1,
+        source: result.data.source || 'direct',
+        sessionId: sessionId
+      });
+
+      if (response.success) {
+        // Store submission ID for tracking shares
+        if (response.data?.id) {
+          sessionStorage.setItem('currentSubmissionId', response.data.id);
+        }
+
+        // Store the submission in session storage for duplicate detection
+        storeSubmissionInSession(result.data.whatsapp);
+
+        // Check if this was marked as duplicate by backend
+        if (response.data?.isDuplicate) {
+          toast.success('We already have your information! Your referral link is ready.');
+        } else {
+          toast.success('Registration successful! Thank you for your interest.');
+        }
+
+        onSubmit(result.data);
+      } else {
+        toast.error(response.message || 'Failed to submit form');
+      }
+    } catch (error: any) {
+      console.error('Form submission error:', error);
+      toast.error('Failed to submit form. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -77,10 +175,10 @@ export const InterestFormSection = ({ id, onSubmit }: InterestFormSectionProps) 
           >
             <div className="bg-muted rounded-3xl p-8 md:p-10 shadow-card">
               <h2 className="text-2xl md:text-3xl font-bold text-soft-navy mb-2">
-                Join the Parent Interest List
+                Register for the Parent Workshop
               </h2>
               <p className="text-muted-foreground mb-8">
-                No spam. Just a calm conversation.
+                A focused session designed for engaged parents. This is for understanding first.
               </p>
               
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -139,6 +237,25 @@ export const InterestFormSection = ({ id, onSubmit }: InterestFormSectionProps) 
                     <p className="text-destructive text-sm mt-1">{errors.ageRange}</p>
                   )}
                 </div>
+
+                <div>
+                  <Label htmlFor="numberOfKids" className="text-soft-navy font-medium">
+                    How Many Kids? <span className="text-xs text-muted-foreground">(Optional)</span>
+                  </Label>
+                  <Select
+                    value={formData.numberOfKids?.toString() || '1'}
+                    onValueChange={(value) => setFormData({ ...formData, numberOfKids: parseInt(value) })}
+                  >
+                    <SelectTrigger className="mt-2 h-12 bg-background border-border">
+                      <SelectValue placeholder="Select number of kids" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                        <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? 'kid' : 'kids'}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 
                 <Button 
                   type="submit" 
@@ -147,7 +264,7 @@ export const InterestFormSection = ({ id, onSubmit }: InterestFormSectionProps) 
                   className="w-full"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Submitting..." : "I'm Interested"}
+                  {isSubmitting ? "Registering..." : "Reserve a Spot"}
                 </Button>
               </form>
             </div>
